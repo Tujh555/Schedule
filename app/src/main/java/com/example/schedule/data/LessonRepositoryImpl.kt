@@ -2,6 +2,7 @@ package com.example.schedule.data
 
 import com.example.schedule.data.database.LessonDao
 import com.example.schedule.data.database.LessonEntity
+import com.example.schedule.data.database.toDb
 import com.example.schedule.data.database.toDomain
 import com.example.schedule.domain.Lesson
 import com.example.schedule.domain.LessonRepository
@@ -15,24 +16,8 @@ class LessonRepositoryImpl(private val lessonDao: LessonDao): LessonRepository {
         .getAllLessons()
         .map { lessons -> lessons.map(LessonEntity::toDomain) }
 
-    override suspend fun createLesson(
-        title: String,
-        startAt: Instant,
-        endAt: Instant,
-        type: LessonType,
-        venue: String,
-        teacherName: String
-    ) {
-        val lessonEntity = LessonEntity(
-            title = title,
-            startAt = startAt,
-            endAt = endAt,
-            type = type,
-            venue = venue,
-            teacherName = teacherName,
-            id = 0
-        )
-
+    override suspend fun createLesson(lesson: Lesson) {
+        val lessonEntity = lesson.toDb()
         lessonDao.insertLesson(lessonEntity)
     }
 

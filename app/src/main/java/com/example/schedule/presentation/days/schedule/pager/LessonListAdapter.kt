@@ -3,10 +3,12 @@ package com.example.schedule.presentation.days.schedule.pager
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.schedule.databinding.LessonsListItemBinding
 import com.example.schedule.domain.Lesson
+import com.example.schedule.presentation.takeAs
 
 class LessonListAdapter : ListAdapter<Pair<String, List<Lesson>>, LessonsListViewHolder>(LessonListDiffCallback) {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): LessonsListViewHolder {
@@ -20,7 +22,6 @@ class LessonListAdapter : ListAdapter<Pair<String, List<Lesson>>, LessonsListVie
         holder.bind(getItem(position).second)
     }
 }
-
 object LessonListDiffCallback : DiffUtil.ItemCallback<Pair<String, List<Lesson>>>() {
     override fun areItemsTheSame(
         oldItem: Pair<String, List<Lesson>>,
@@ -48,13 +49,26 @@ object LessonListDiffCallback : DiffUtil.ItemCallback<Pair<String, List<Lesson>>
     }
 }
 
-class LessonsListViewHolder(
-    private val binding: LessonsListItemBinding
-) : RecyclerView.ViewHolder(binding.root) {
+class LessonsListViewHolder(binding: LessonsListItemBinding) : RecyclerView.ViewHolder(binding.root) {
+    private val root = binding.root
+
     fun bind(list: List<Lesson>) {
-        val adapter = LessonAdapter()
-        binding.root.adapter = adapter
-        adapter.submitList(list)
+        if (root.adapter == null) {
+            root.adapter = LessonAdapter()
+        }
+
+        if (root.layoutManager == null) {
+            root.layoutManager = LinearLayoutManager(
+                root.context,
+                LinearLayoutManager.VERTICAL,
+                false
+            )
+        }
+
+        root.adapter
+            ?.takeAs<LessonAdapter>()
+            ?.submitList(list)
     }
 }
+
 

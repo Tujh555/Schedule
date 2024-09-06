@@ -7,6 +7,7 @@ import java.time.format.DateTimeFormatter
 object TimeFormatter {
     private val daysMothsFormatter = provide("dd.MM")
     private val daytimeFormatter = provide("HH:mm")
+    private val newYorkFormat = provide("dd.MM.yyyy HH:mm")
 
     private fun provide(pattern: String): DateTimeFormatter = DateTimeFormatter
         .ofPattern(pattern)
@@ -15,4 +16,6 @@ object TimeFormatter {
     fun formatAsDaysWithMoths(time: Instant): String = daysMothsFormatter.format(time)
 
     fun formatAsDaytime(time: Instant): String = daytimeFormatter.format(time)
+
+    fun formatAsNewYork(time: Instant): String = newYorkFormat.format(time)
 }

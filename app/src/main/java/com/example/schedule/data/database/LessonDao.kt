@@ -15,7 +15,7 @@ interface LessonDao {
     @Query("DELETE FROM LessonEntity WHERE id = :id")
     suspend fun deleteLesson(id: Int)
 
-    @Query("SELECT * FROM LessonEntity")
+    @Query("SELECT * FROM LessonEntity ORDER BY start_at")
     fun getAllLessons(): Flow<List<LessonEntity>>
 
     @Query("SELECT * FROM LessonEntity WHERE start_at >= :start AND start_at <= :end")

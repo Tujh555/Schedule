@@ -10,17 +10,14 @@ import androidx.lifecycle.lifecycleScope
 import by.kirich1409.viewbindingdelegate.viewBinding
 import com.example.schedule.R
 import com.example.schedule.databinding.FragmentDaysScheduleBinding
-import com.example.schedule.domain.LessonType
 import com.example.schedule.presentation.addition.AdditionFragment
-import com.example.schedule.presentation.addition.AdditionListener
+import com.example.schedule.presentation.days.schedule.pager.AlphaPageTransformer
 import com.example.schedule.presentation.days.schedule.pager.LessonListAdapter
-import com.example.schedule.presentation.days.schedule.pager.ZoomOutPageTransformer
 import com.google.android.material.tabs.TabLayoutMediator
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import java.time.Instant
 
-class DaysScheduleFragment : Fragment(R.layout.fragment_days_schedule), AdditionListener {
+class DaysScheduleFragment : Fragment(R.layout.fragment_days_schedule) {
     private val binding by viewBinding(FragmentDaysScheduleBinding::bind)
     private val viewModel by viewModels<DayScheduleViewModel>()
     private val lessonListAdapter = LessonListAdapter()
@@ -42,7 +39,7 @@ class DaysScheduleFragment : Fragment(R.layout.fragment_days_schedule), Addition
         val pager = binding.pager
 
         pager.adapter = lessonListAdapter
-        pager.setPageTransformer(ZoomOutPageTransformer())
+        pager.setPageTransformer(AlphaPageTransformer())
         val mediator = TabLayoutMediator(binding.tabLayout, pager) { tab, positon ->
             val (currentTabText, _) = lessonListAdapter.currentList[positon]
 
@@ -55,26 +52,8 @@ class DaysScheduleFragment : Fragment(R.layout.fragment_days_schedule), Addition
     private fun observeLessonList() {
         viewModel
             .groupedLessons
-            .flowWithLifecycle(lifecycle, Lifecycle.State.RESUMED)
+            .flowWithLifecycle(lifecycle, Lifecycle.State.CREATED)
             .onEach(lessonListAdapter::submitList)
             .launchIn(lifecycleScope)
-    }
-
-    override fun onAddFinished(
-        title: String,
-        startAt: Instant,
-        endAt: Instant,
-        type: LessonType,
-        venue: String,
-        teacherName: String
-    ) {
-        viewModel.createLesson(
-            title = title,
-            startAt = startAt,
-            endAt = endAt,
-            type = type,
-            venue = venue,
-            teacherName = teacherName
-        )
     }
 }

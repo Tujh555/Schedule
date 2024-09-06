@@ -7,7 +7,9 @@ import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
+import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.DialogFragment
+import androidx.fragment.app.viewModels
 import by.kirich1409.viewbindingdelegate.viewBinding
 import com.example.schedule.R
 import com.example.schedule.databinding.FragmentAdditionBinding
@@ -16,14 +18,13 @@ import com.example.schedule.presentation.getTitle
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.timepicker.MaterialTimePicker
 import java.time.Instant
-import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
 
 class AdditionFragment : DialogFragment(R.layout.fragment_addition) {
     private val binding by viewBinding(FragmentAdditionBinding::bind)
-    private var additionListener: AdditionListener? = null
+    private val viewModel by viewModels<AdditionViewModel>()
     private val lessonTypes = LessonType.entries.map(LessonType::getTitle)
     private val lessonTypesAdapter by lazy {
         ArrayAdapter(
@@ -32,43 +33,23 @@ class AdditionFragment : DialogFragment(R.layout.fragment_addition) {
             lessonTypes
         )
     }
-    private var dateStart: Long? = null
-    private var dateEnd: Long? = null
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         setWidthPercent(95)
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        savedInstanceState?.let { bundle ->
-            dateStart = bundle.getLong(START_KEY)
-            dateEnd = bundle.getLong(END_KEY)
-        }
-    }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         dialog?.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-        additionListener = parentFragment as? AdditionListener
         binding.tvType.setAdapter(lessonTypesAdapter)
 
-        updateTimeText()
+        binding.tvTitle.addTextChangedListener { text -> viewModel.onTitleInput(text) }
+        binding.tvVenue.addTextChangedListener { text -> viewModel.onVenueInput(text) }
+        binding.tvTeacherName.addTextChangedListener { viewModel.onTeacherNameInput(it) }
 
         binding.btnSave.setOnClickListener {
-            // TODO накрутить валидацию
-            additionListener?.let {
-                it.onAddFinished(
-                    title = binding.tvTitle.text?.toString().orEmpty(),
-                    startAt = Instant.ofEpochMilli(dateStart ?: 0),
-                    endAt = Instant.ofEpochMilli(dateEnd ?: 0),
-                    type = LessonType.LECTURE,
-                    venue = binding.tvVenue.text?.toString().orEmpty(),
-                    teacherName = binding.tvTeacherName.text?.toString().orEmpty()
-                )
-            }
+            viewModel.addLesson()
             dismiss()
         }
 
@@ -76,95 +57,62 @@ class AdditionFragment : DialogFragment(R.layout.fragment_addition) {
             dismiss()
         }
 
+        initButtonChooseTime()
+    }
+
+    private fun initButtonChooseTime() {
         binding.btnChooseTime.setOnClickListener {
-            val startDatePicker =
-                MaterialDatePicker.Builder
-                    .datePicker()
-                    .setTitleText("Выберите дату начала")
-                    .setSelection(MaterialDatePicker.todayInUtcMilliseconds())
-                    .build()
-
-            startDatePicker.addOnPositiveButtonClickListener {
-                var startDate = startDatePicker.selection
-
-                val startTimePicker = MaterialTimePicker.Builder()
-                    .setTitleText("Выберите время начала")
-                    .build()
-
-                startTimePicker.addOnPositiveButtonClickListener {
-                    val startTimeMillis = startTimePicker.hour * 3_600_000 + startTimePicker.minute * 60000
-
-                    startDate = (startDate ?: 0) + startTimeMillis
-
-                    val endDatePicker =
-                        MaterialDatePicker.Builder
-                            .datePicker()
-                            .setTitleText("Выберите дату конца")
-                            .setSelection(MaterialDatePicker.todayInUtcMilliseconds())
-                            .build()
-
-                    endDatePicker.addOnPositiveButtonClickListener {
-                        var endDate = endDatePicker.selection
-
-                        MaterialTimePicker.Builder()
-                            .setTitleText("Выберите время конца")
-                            .build()
-                            .apply {
-                                addOnPositiveButtonClickListener {
-                                    val endTimeMillis =
-                                        startTimePicker.hour * 3_600_000 + startTimePicker.minute * 60000
-
-                                    endDate = (endDate ?: 0) + endTimeMillis
-
-                                    dateStart = startDate
-                                    dateEnd = endDate
-                                    updateTimeText()
-                                }
-                            }
-                            .show(parentFragmentManager, "end time")
-                    }
-
-                    endDatePicker.show(parentFragmentManager, "end date")
-                }
-
-                startTimePicker.show(parentFragmentManager, "start time")
-            }
-
-            startDatePicker.show(parentFragmentManager, "start date")
-        }
-    }
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-
-        dateStart?.let { start ->
-            dateEnd?.let { end ->
-                outState.putLong(START_KEY, start)
-                outState.putLong(END_KEY, end)
+            showDatePicker("Выберите дату начала") {
+                viewModel.onStartDatePicked(it)
+                showStartTimePicker()
             }
         }
     }
 
-    private fun updateTimeText() {
-        if (dateStart == null || dateEnd == null) {
-            binding.tvTime.setText("Выберите время")
-            return
+    private fun showStartTimePicker() {
+        showTimePicker("Выберите время начала") { hour, minute ->
+            viewModel.onStartTimePicked(hour, minute)
+            showEndDatePicker()
+        }
+    }
+
+    private fun showEndDatePicker() {
+        showDatePicker("Выберите дату конца") {
+            viewModel.onEndDatePicked(it)
+            showEndTimePicker()
+        }
+    }
+
+    private fun showEndTimePicker() {
+        showTimePicker(
+            title = "Выберите время конца",
+            onAccept = viewModel::onEndTimePicked
+        )
+    }
+
+    private fun showDatePicker(title: String, onAccept: (Long?) -> Unit) {
+        val picker = MaterialDatePicker.Builder
+            .datePicker()
+            .setTitleText(title)
+            .setSelection(MaterialDatePicker.todayInUtcMilliseconds())
+            .build()
+
+        picker.addOnPositiveButtonClickListener(onAccept)
+
+        picker.show(parentFragmentManager, "")
+    }
+
+    private fun showTimePicker(title: String, onAccept: (Int, Int) -> Unit) {
+        val picker = MaterialTimePicker
+            .Builder()
+            .setTitleText(title)
+            .build()
+
+        picker.addOnPositiveButtonClickListener {
+            onAccept(picker.hour, picker.minute)
         }
 
-        val newText = buildString {
-            val start = Instant.ofEpochMilli(dateStart ?: 0)
-            val end = Instant.ofEpochMilli(dateEnd ?: 0)
-
-            val formatter = DateTimeFormatter
-                .ofPattern("MM/dd/yyyy 'at' hh:mm a")
-                .withZone(ZoneId.systemDefault())
-
-            append("С ")
-            append(formatter.format(start))
-            append(" ПО")
-            append(formatter.format(end))
-        }
-        binding.tvTime.setText(newText)
+        picker.show(parentFragmentManager, "")
     }
 
     private fun setWidthPercent(percentage: Int) {
@@ -173,10 +121,5 @@ class AdditionFragment : DialogFragment(R.layout.fragment_addition) {
         val rect = dm.run { Rect(0, 0, widthPixels, heightPixels) }
         val percentWidth = rect.width() * percent
         dialog?.window?.setLayout(percentWidth.toInt(), ViewGroup.LayoutParams.WRAP_CONTENT)
-    }
-
-    companion object {
-        private const val END_KEY = "end"
-        private const val START_KEY = "start"
     }
 }

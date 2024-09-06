@@ -21,24 +21,4 @@ class DayScheduleViewModel : ViewModel() {
                     .groupBy { lesson -> TimeFormatter.formatAsDaysWithMoths(lesson.startAt) }
                     .toList()
             }
-
-    fun createLesson(
-        title: String,
-        startAt: Instant,
-        endAt: Instant,
-        type: LessonType,
-        venue: String,
-        teacherName: String
-    ) {
-        viewModelScope.launch(Dispatchers.IO) {
-            repository.createLesson(
-                title = title,
-                startAt = startAt,
-                endAt = endAt,
-                type = type,
-                venue = venue,
-                teacherName = teacherName
-            )
-        }
-    }
 }

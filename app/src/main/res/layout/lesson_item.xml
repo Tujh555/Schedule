@@ -4,8 +4,10 @@
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:layout_margin="8dp"
     android:clickable="true"
-    android:elevation="8dp">
+    app:cardCornerRadius="8dp"
+    android:elevation="16dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -14,7 +16,7 @@
 
         <TextView
             android:id="@+id/tv_time"
-            android:layout_width="wrap_content"
+            android:layout_width="50dp"
             android:layout_height="wrap_content"
             android:textAppearance="@style/RegularText"
             android:textSize="20sp"
@@ -23,7 +25,7 @@
             android:textAlignment="center"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/tv_title"
+
             app:layout_constraintBottom_toBottomOf="parent" />
 
         <TextView
@@ -33,8 +35,9 @@
             android:textAppearance="@style/RegularText"
             android:textSize="24sp"
             android:textStyle="bold"
-            android:maxLines="1"
+            android:singleLine="true"
             android:ellipsize="end"
+            android:textAlignment="viewStart"
             tools:text="Название предмета"
             app:layout_constraintStart_toEndOf="@id/tv_time"
             app:layout_constraintTop_toTopOf="parent"
@@ -47,8 +50,9 @@
             android:layout_height="wrap_content"
             android:textAppearance="@style/RegularText"
             android:textSize="18sp"
-            android:maxLines="1"
+            android:singleLine="true"
             android:ellipsize="end"
+            android:textAlignment="viewStart"
             tools:text="Лекция 403 3г"
             app:layout_constraintStart_toEndOf="@id/tv_time"
             app:layout_constraintTop_toBottomOf="@id/tv_title"
@@ -63,8 +67,9 @@
             android:textSize="16sp"
             android:textStyle="bold"
             tools:text="Преподаватель"
-            android:maxLines="1"
+            android:singleLine="true"
             android:ellipsize="end"
+            android:textAlignment="viewStart"
             app:layout_constraintStart_toEndOf="@id/tv_time"
             app:layout_constraintTop_toBottomOf="@id/tv_subtitle"
             app:layout_constraintBottom_toBottomOf="parent"

@@ -34,3 +34,13 @@ fun LessonEntity.toDomain() = Lesson(
     venue = venue,
     teacherName = teacherName
 )
+
+fun Lesson.toDb() = LessonEntity(
+    id = 0,
+    title = title,
+    startAt = startAt,
+    endAt = endAt,
+    type = type,
+    venue = venue,
+    teacherName = teacherName
+)

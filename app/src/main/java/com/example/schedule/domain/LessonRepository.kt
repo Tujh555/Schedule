@@ -6,14 +6,7 @@ import java.time.Instant
 interface LessonRepository {
     val lessons: Flow<List<Lesson>>
 
-    suspend fun createLesson(
-        title: String,
-        startAt: Instant,
-        endAt: Instant,
-        type: LessonType,
-        venue: String,
-        teacherName: String
-    )
+    suspend fun createLesson(lesson: Lesson)
 
     suspend fun deleteLesson(id: Int)
 
