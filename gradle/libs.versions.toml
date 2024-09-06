@@ -1,0 +1,26 @@
+[versions]
+agp = "8.6.0"
+kotlin = "1.9.0"
+coreKtx = "1.13.1"
+lifecycleRuntimeKtx = "2.8.5"
+fragmentActivty = "1.8.3"
+viewPager = "1.1.0"
+roomVersion = "2.6.1"
+constraintLayout = "2.1.4"
+material = "1.12.0"
+viewBinding = "1.5.9"
+
+[libraries]
+androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
+androidx-activity = { module = "androidx.fragment:fragment-ktx", version.ref = "fragmentActivty" }
+view-pager = { module = "androidx.viewpager2:viewpager2", version.ref = "viewPager" }
+androidx-room = { module = "androidx.room:room-ktx", version.ref = "roomVersion" }
+androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "roomVersion" }
+constraint-layout = { module = "androidx.constraintlayout:constraintlayout", version.ref = "constraintLayout" }
+material = { module = "com.google.android.material:material", version.ref = "material" }
+view-binding-delegate = { module = "com.github.kirich1409:viewbindingpropertydelegate-noreflection", version.ref = "viewBinding" }
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "agp" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }

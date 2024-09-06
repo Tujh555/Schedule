@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.Schedule" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <!-- Primary brand color. -->
+        <item name="colorPrimary">@color/orange_main</item>
+        <item name="colorPrimaryVariant">@color/purple_700</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <!-- Secondary brand color. -->
+        <item name="colorSecondary">@color/teal_200</item>
+        <item name="colorSecondaryVariant">@color/teal_700</item>
+        <item name="colorOnSecondary">@color/black</item>
+        <!-- Status bar color. -->
+        <item name="android:statusBarColor">@color/gray</item>
+        <!-- Customize your theme here. -->
+        <item name="android:windowLightStatusBar">true</item>
+    </style>
+
+    <style name="TextAppearance.AppCompat.DefaultTextStyle">
+        <item name="android:textColor">@color/dark_blue_main</item>
+        <item name="android:letterSpacing">-0.01</item>
+    </style>
+
+    <style name="SplashScreenInscription" parent="TextAppearance.AppCompat.DefaultTextStyle">
+        <item name="android:textSize">30sp</item>
+        <item name="android:lineSpacingExtra">-5sp</item>
+        <item name="android:textColor">@color/white</item>
+    </style>
+
+    <style name="RegularText" parent="TextAppearance.AppCompat.DefaultTextStyle">
+        <item name="android:textSize">18sp</item>
+        <item name="android:letterSpacing">-0.02</item>
+    </style>
+
+    <style name="TextAppearance.AppCompat.Thin">
+        <item name="android:textColor">@color/orange_main</item>
+        <item name="android:letterSpacing">-0.02</item>
+    </style>
+
+    <style name="CategoryItemsText" parent="RegularText">
+        <item name="android:textSize">12sp</item>
+        <item name="android:letterSpacing">-0.03</item>
+    </style>
+
+    <style name="OldPriceStyle" parent="TextAppearance.AppCompat">
+        <item name="android:textSize">10sp</item>
+        <item name="android:textColor">@color/old_price_color</item>
+    </style>
+
+    <style name="SpinnerStyle" parent="TextAppearance.AppCompat.Thin">
+        <item name="android:textColor">@color/dark_blue_main</item>
+        <item name="android:textSize">18sp</item>
+    </style>
+
+    <style name="DropDownContainer" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
+        <item name="boxCornerRadiusBottomEnd">5dp</item>
+        <item name="boxCornerRadiusBottomStart">5dp</item>
+        <item name="boxCornerRadiusTopEnd">5dp</item>
+        <item name="boxCornerRadiusTopStart">5dp</item>
+        <item name="endIconTint">@color/light_gray</item>
+        <item name="boxStrokeWidth">1px</item>
+        <item name="endIconMode">dropdown_menu</item>
+    </style>
+
+    <style name="DropDownMenu">
+        <item name="android:inputType">none</item>
+        <item name="background">@null</item>
+        <item name="android:ellipsize">end</item>
+        <item name="maxLines">1</item>
+        <item name="android:textAppearance">@style/SpinnerStyle</item>
+    </style>
+
+    <style name="SmallButton">
+        <item name="cardCornerRadius">10dp</item>
+    </style>
+
+    <style name="ProductHardwareItemsText">
+        <item name="android:maxWidth">70dp</item>
+        <item name="android:textAppearance">@style/TextAppearance.AppCompat.Thin</item>
+        <item name="android:textColor">@color/product_hardware_images_color</item>
+        <item name="android:textSize">11sp</item>
+        <item name="android:textAlignment">center</item>
+    </style>
+
+    <style name="LargeButtonStyle">
+        <item name="android:layout_height">wrap_content</item>
+        <item name="cardCornerRadius">10dp</item>
+        <item name="cardBackgroundColor">@color/orange_main</item>
+    </style>
+
+    <style name="ProgressBarDefault">
+        <item name="android:indeterminateTint">@color/orange_main</item>
+    </style>
+
+    <style name="UnselectedCardCategory">
+        <item name="cardElevation">10dp</item>
+        <item name="backgroundTint">@color/white</item>
+    </style>
+
+    <style name="SelectedCardCategory">
+        <item name="cardElevation">0dp</item>
+        <item name="backgroundTint">@color/orange_main</item>
+    </style>
+
+    <style name="SelectedCategoryText" parent="CategoryItemsText">
+        <item name="android:textColor">@color/orange_main</item>
+    </style>
+</resources>
