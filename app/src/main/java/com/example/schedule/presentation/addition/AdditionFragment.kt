@@ -10,16 +10,21 @@ import android.widget.ArrayAdapter
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.flowWithLifecycle
+import androidx.lifecycle.lifecycleScope
 import by.kirich1409.viewbindingdelegate.viewBinding
 import com.example.schedule.R
 import com.example.schedule.databinding.FragmentAdditionBinding
 import com.example.schedule.domain.LessonType
 import com.example.schedule.presentation.getTitle
+import com.example.schedule.presentation.takeAs
 import com.google.android.material.datepicker.MaterialDatePicker
+import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.timepicker.MaterialTimePicker
-import java.time.Instant
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 
 
 class AdditionFragment : DialogFragment(R.layout.fragment_addition) {
@@ -34,33 +39,119 @@ class AdditionFragment : DialogFragment(R.layout.fragment_addition) {
         )
     }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
         setWidthPercent(95)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         dialog?.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-        binding.tvType.setAdapter(lessonTypesAdapter)
 
-        binding.tvTitle.addTextChangedListener { text -> viewModel.onTitleInput(text) }
-        binding.tvVenue.addTextChangedListener { text -> viewModel.onVenueInput(text) }
-        binding.tvTeacherName.addTextChangedListener { viewModel.onTeacherNameInput(it) }
+        setupLessonType()
+        setupTitleTv()
+        setupVenueTv()
+        setupTeacherNameTv()
+        initButtonChooseTime()
 
         binding.btnSave.setOnClickListener {
-            viewModel.addLesson()
-            dismiss()
+            val canAddLesson = viewModel.addLesson()
+            if (canAddLesson) {
+                dismiss()
+            }
         }
 
         binding.btnCancel.setOnClickListener {
             dismiss()
         }
+    }
 
-        initButtonChooseTime()
+    private fun setupLessonType() {
+        binding.tvType.setAdapter(lessonTypesAdapter)
+
+        binding.tvType.setOnItemClickListener { adapterView, _, i, _ ->
+            adapterView
+                .getItemAtPosition(i)
+                .takeAs<String>()
+                ?.let { selectedItem ->
+                    val index = lessonTypes.indexOf(selectedItem)
+
+                    if (index != -1) {
+                        val selectedType = LessonType.entries[index]
+                        viewModel.onLessonTypeSelected(selectedType)
+                    }
+                }
+        }
+
+        viewModel.lessonTypeState
+            .flowWithLifecycle(lifecycle, Lifecycle.State.RESUMED)
+            .onEach { typeResult ->
+                binding.tvType.error = if (typeResult?.isFailure == true) {
+                    "Выберите тип предмета"
+                } else {
+                    null
+                }
+            }
+            .launchIn(lifecycleScope)
+    }
+
+    private fun setupTeacherNameTv() {
+        binding.tvTeacherName.addTextChangedListener(
+            afterTextChanged = viewModel::onTeacherNameInput
+        )
+        viewModel.teacherNameState.observeInputStateFor(
+            editText = binding.tvTeacherName,
+            error = "Введите имя преподавателя"
+        )
+    }
+
+    private fun setupVenueTv() {
+        binding.tvVenue.addTextChangedListener(afterTextChanged = viewModel::onVenueInput)
+        viewModel.venueState.observeInputStateFor(
+            editText = binding.tvVenue,
+            error = "Введите место"
+        )
+    }
+
+    private fun setupTitleTv() {
+        binding.tvTitle.addTextChangedListener(afterTextChanged = viewModel::onTitleInput)
+        viewModel.titleState.observeInputStateFor(
+            editText = binding.tvTitle,
+            error = "Введите название"
+        )
+    }
+
+    private fun Flow<InputState>.observeInputStateFor(
+        editText: TextInputEditText,
+        error: String
+    ) {
+        flowWithLifecycle(lifecycle, Lifecycle.State.RESUMED)
+            .onEach { inputState ->
+                editText.error = when (inputState) {
+                    InputState.Error -> error
+                    is InputState.Text -> null
+                }
+            }
+            .launchIn(lifecycleScope)
+    }
+
+    private fun setupTvTime() {
+        viewModel.timeState
+            .flowWithLifecycle(lifecycle, Lifecycle.State.RESUMED)
+            .onEach { timeState ->
+                binding.tvTime.error = when (timeState) {
+                    TimeState.EmptyRangeError -> "Выберите время"
+
+                    TimeState.IncorrectBoundsError -> "Некорректное время"
+
+                    is TimeState.Range -> null
+                }
+            }
+            .launchIn(lifecycleScope)
     }
 
     private fun initButtonChooseTime() {
+        setupTvTime()
         binding.btnChooseTime.setOnClickListener {
             showDatePicker("Выберите дату начала") {
                 viewModel.onStartDatePicked(it)
@@ -117,8 +208,9 @@ class AdditionFragment : DialogFragment(R.layout.fragment_addition) {
 
     private fun setWidthPercent(percentage: Int) {
         val percent = percentage.toFloat() / 100
-        val dm = resources.displayMetrics
-        val rect = dm.run { Rect(0, 0, widthPixels, heightPixels) }
+        val rect = resources.displayMetrics.run {
+            Rect(0, 0, widthPixels, heightPixels)
+        }
         val percentWidth = rect.width() * percent
         dialog?.window?.setLayout(percentWidth.toInt(), ViewGroup.LayoutParams.WRAP_CONTENT)
     }
